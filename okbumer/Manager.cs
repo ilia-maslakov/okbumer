@@ -7,36 +7,56 @@ using System.Threading.Tasks;
 
 namespace okbumer
 {
-    class Manager
+    class Manager : IDisposable
     {
         private static Form1 _mainForm;
         private static Job _mainJob;
         private static Task<bool> _mainTask;
+        private CancellationTokenSource _cts;
 
-        public Manager(Form1 frm) {
+        public Manager(Form1 frm)
+        {
             _mainForm = frm;
+            CreateCancelletionToken();
         }
+
+        private void CreateCancelletionToken()
+        {
+            //_cts?.Dispose();
+            _cts = new CancellationTokenSource();
+        }
+
+        public void Dispose()
+        {
+            _cts?.Dispose();
+        }
+
 
         public void FoundWinner(int winner)
         {
             if (_mainJob != null) {
-                _mainJob.SetWinner(winner);
                 if (winner != 0) {
-                    _mainJob.Reset(true);
+                    _cts.Cancel();
                 }
             }
+        }
+
+        public void Stop()
+        {
+            _cts.Cancel();
         }
 
         public void ResetJob()
         {
             if (_mainJob != null)
             {
-                _mainJob.Reset(false);
+                Stop();
             }
         }
 
         public async Task StartAsync()
         {
+            CreateCancelletionToken();
             var progress = new Progress<int>(v => _mainForm.UpdateProgress(v));
             await Start(progress);
         }
@@ -49,7 +69,7 @@ namespace okbumer
                 _mainTask = Task.Run(() =>
                     {
                         _mainJob = new Job();
-                        _mainJob.Start(progress);
+                        _mainJob.Start(progress, _cts.Token);
                         return true;
                     });
             }
@@ -59,35 +79,27 @@ namespace okbumer
 
     class Job
     {
-        private static int _hasWinner = 0;
-        private static bool _reset = false;
-        public void Start(IProgress<int> progress)
+
+        public async void Start(IProgress<int> progress, CancellationToken ct)
         {
             int step = 0;
-            while (!_reset)
+            while (!ct.IsCancellationRequested)
             {
-                Thread.Sleep(125);
-                if (progress != null)
+                try {
+                    await Task.Delay(125, ct).ConfigureAwait(false);
+                    if (progress != null)
+                    {
+                        progress.Report(step++);
+                    }
+                }
+                catch (Exception e)
                 {
-                    progress.Report(step++);
+                    Console.WriteLine(e.Message);
+                    step = 0;
+                    progress = null;
                 }
             }
-            _reset = false;
         }
-
-        internal void SetWinner(int winner)
-        {
-            _hasWinner = winner;
-            if (winner != 0)
-            {
-                _reset = true;
-            }
-        }
-        internal void Reset(bool flag)
-        {
-            _reset = flag;
-        }
-        
     }
 
 }

@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -46,7 +45,8 @@ namespace okbumer
                 v = 5;
             }
             mgr.FoundWinner(v);
-            if (v > 0) {
+            if (v > 0)
+            {
                 Int32.TryParse(textBox1.Text, out int res);
                 if (v == res)
                 {
@@ -58,6 +58,7 @@ namespace okbumer
                 }
             }
         }
+
 
         private bool CheckWinner(ProgressBar pBar, int step)
         {
@@ -97,19 +98,10 @@ namespace okbumer
             label1.Text = "Your bet is: " + textBox1.Text;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void StartBtn_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void StartBtn_Click_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }

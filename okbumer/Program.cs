@@ -9,16 +9,16 @@ namespace okbumer
     static class Program
     {
         /// <summary>
-        /// Главная точка входа для приложения.
+        ///  The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var frm = new Form1();
             Application.Run(frm);
-
         }
     }
 }
